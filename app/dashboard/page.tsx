@@ -4,20 +4,30 @@ import { useEffect, useState } from "react"
 import StatCard from "@/components/dashboard/StatCard"
 import AttendanceTable from "@/components/dashboard/AttendanceTable"
 import Loader from "@/components/ui/Loader"
+import { AttendanceRecord } from "@/types/attendance"
+
+
+interface DashboardData {
+  expectedHours: number
+  workedHours: number
+  leavesUsed: number
+  productivity: string
+  records: AttendanceRecord[]
+}
 
 export default function DashboardPage() {
   const [month, setMonth] = useState(
     new Date().toISOString().slice(0, 7)
   )
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<DashboardData | null>(null)
 
   useEffect(() => {
     fetch(`/api/dashboard?month=${month}`)
       .then((res) => res.json())
-      .then(setData)
+      .then((response: DashboardData) => setData(response))
   }, [month])
 
- if (!data) return <Loader text="Loading dashboard..." />
+  if (!data) return <Loader text="Loading dashboard..." />
 
   return (
     <div className="p-6 space-y-8">
@@ -25,12 +35,11 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-  Leave & Productivity
-</h1>
-<p className="muted mt-1">
-  Analytics overview of attendance performance
-</p>
-
+            Leave & Productivity
+          </h1>
+          <p className="muted mt-1">
+            Analytics overview of attendance performance
+          </p>
         </div>
 
         <input
@@ -38,7 +47,6 @@ export default function DashboardPage() {
           value={month}
           onChange={(e) => setMonth(e.target.value)}
           className="rounded-lg border border-[var(--border-color)] bg-white/5 px-3 py-2 text-sm text-white backdrop-blur"
-
         />
       </div>
 

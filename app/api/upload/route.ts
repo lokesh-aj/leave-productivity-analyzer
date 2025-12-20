@@ -3,10 +3,17 @@ import { prisma } from "@/lib/prisma"
 import * as XLSX from "xlsx"
 import dayjs from "dayjs"
 
+interface ExcelRow {
+  "Employee Name": string
+  Date: string
+  "In-Time"?: string
+  "Out-Time"?: string
+}
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
-    const file = formData.get("file") as File
+    const file = formData.get("file") as File | null
 
     if (!file) {
       return NextResponse.json(
@@ -18,7 +25,8 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const workbook = XLSX.read(buffer, { type: "buffer" })
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
-    const rows: any[] = XLSX.utils.sheet_to_json(sheet)
+
+    const rows = XLSX.utils.sheet_to_json<ExcelRow>(sheet)
 
     for (const row of rows) {
       const date = dayjs(row.Date).toDate()

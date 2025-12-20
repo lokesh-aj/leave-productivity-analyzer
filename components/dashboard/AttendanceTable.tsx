@@ -1,13 +1,5 @@
 import dayjs from "dayjs"
-
-interface AttendanceRecord {
-  id: string
-  date: string
-  inTime?: string
-  outTime?: string
-  workedHours: number
-  isLeave: boolean
-}
+import { AttendanceRecord } from "@/types/attendance"
 
 export default function AttendanceTable({
   records,
