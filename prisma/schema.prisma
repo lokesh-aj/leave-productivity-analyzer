@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+}
+
+model Attendance {
+  id String @id @map("_id") @db.ObjectId
+  employeeName String
+  date         DateTime
+  inTime       String?
+  outTime      String?
+  workedHours  Float
+  isLeave      Boolean
+  createdAt   DateTime @default(now())
+}
