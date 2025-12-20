@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
+/* =====================
+   DARK ANALYTICS THEME
+===================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0f2a;           /* deep purple */
+  --foreground: #e5e7eb;
+
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.12);
+
+  --primary: #38bdf8;              /* neon blue */
+  --primary-soft: rgba(56, 189, 248, 0.15);
+
+  --success: #4ade80;
+  --danger: #f87171;
+
+  --muted-text: #9ca3af;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* =====================
+   BASE STYLES
+===================== */
 body {
-  background: var(--background);
+  background: radial-gradient(
+    circle at top left,
+    #1e1b4b,
+    var(--background)
+  );
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* =====================
+   GLASS CARD
+===================== */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.muted {
+  color: var(--muted-text);
 }
