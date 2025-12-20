@@ -1,48 +1,59 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { parseExcel } from "@/lib/excel"
-import { calculateWorkedHours } from "@/lib/calculations"
+import * as XLSX from "xlsx"
+import dayjs from "dayjs"
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const formData = await req.formData()
     const file = formData.get("file") as File
 
     if (!file) {
       return NextResponse.json(
-        { error: "No file uploaded" },
+        { message: "No file uploaded" },
         { status: 400 }
       )
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const rows: any[] = parseExcel(buffer)
+    const workbook = XLSX.read(buffer, { type: "buffer" })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const rows: any[] = XLSX.utils.sheet_to_json(sheet)
 
     for (const row of rows) {
-      const workedHours = calculateWorkedHours(
-        row["In-Time"],
-        row["Out-Time"]
-      )
+      const date = dayjs(row.Date).toDate()
+      const day = dayjs(date).day()
 
-      const isLeave = !row["In-Time"] || !row["Out-Time"]
+      let workedHours = 0
+      let isLeave = false
+
+      if (!row["In-Time"] || !row["Out-Time"]) {
+        if (day !== 0) isLeave = true
+      } else {
+        const inTime = dayjs(`${row.Date} ${row["In-Time"]}`)
+        const outTime = dayjs(`${row.Date} ${row["Out-Time"]}`)
+        workedHours = outTime.diff(inTime, "hour", true)
+      }
 
       await prisma.attendance.create({
         data: {
           employeeName: row["Employee Name"],
-          date: new Date(row["Date"]),
-          inTime: row["In-Time"],
-          outTime: row["Out-Time"],
+          date,
+          inTime: row["In-Time"] || null,
+          outTime: row["Out-Time"] || null,
           workedHours,
           isLeave,
         },
       })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      message: "Attendance data uploaded successfully",
+    })
   } catch (error) {
     console.error(error)
     return NextResponse.json(
-      { error: "Failed to process file" },
+      { message: "Upload failed" },
       { status: 500 }
     )
   }

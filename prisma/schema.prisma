@@ -4,15 +4,16 @@ generator client {
 
 datasource db {
   provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Attendance {
-  id String @id @map("_id") @db.ObjectId
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   employeeName String
   date         DateTime
   inTime       String?
   outTime      String?
   workedHours  Float
   isLeave      Boolean
-  createdAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
 }

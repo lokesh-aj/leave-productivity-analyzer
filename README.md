@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Leave & Productivity Analyzer
 
-## Getting Started
+A full‑stack web application that allows HR teams or managers to upload employee attendance data via Excel and instantly view productivity insights through a real‑time dashboard.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Features
+
+* 📤 Upload attendance data using Excel (.xlsx)
+* 📊 Dashboard with real‑time statistics
+
+  * Expected Working Hours
+  * Worked Hours
+  * Leaves Used
+  * Productivity Percentage
+* 📅 Daily attendance table (date-wise view)
+* 🔍 Month-wise filtering
+* 🗄️ Data stored securely using MongoDB with Prisma ORM
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend**
+
+* Next.js 15 (App Router)
+* TypeScript
+* Tailwind CSS
+
+**Backend**
+
+* Next.js API Routes
+* Prisma ORM
+* MongoDB
+
+**Utilities**
+
+* Excel parsing (xlsx)
+* Date handling (dayjs)
+
+---
+
+## 📂 Project Structure
+
+```
+/app
+  /dashboard        → Dashboard UI
+  /upload           → Excel upload UI
+  /api
+    /upload         → Excel upload API
+    /dashboard      → Dashboard data API
+/lib
+  prisma.ts         → Prisma client
+  calculations.ts  → Productivity logic
+/prisma
+  schema.prisma
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📥 Sample Excel Format
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Employee Name | Date       | In Time | Out Time | Is Leave |
+| ------------- | ---------- | ------- | -------- | -------- |
+| John Doe      | 2025-02-01 | 09:30   | 18:00    | No       |
+| John Doe      | 2025-02-02 |         |          | Yes      |
 
-## Learn More
+> A sample file is available in `/samples/attendance_sample.xlsx`
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ▶️ How It Works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. User uploads Excel from **Upload Page**
+2. Backend parses and stores data in MongoDB
+3. Dashboard API calculates metrics
+4. Dashboard UI displays updated stats and table
 
-## Deploy on Vercel
+There is **no separate success page** — the dashboard itself reflects uploaded data, which is standard real‑world architecture.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧪 API Endpoints
+
+### Upload Excel
+
+```
+POST /api/upload
+```
+
+### Dashboard Data
+
+```
+GET /api/dashboard?month=YYYY-MM
+```
+
+---
+
+## 💼 Interview Explanation (Short)
+
+> “This application allows uploading attendance data via Excel. The data is processed and stored using Prisma and MongoDB, and a dashboard dynamically computes productivity metrics with month-wise filtering.”
+
+---
+
+## 📌 Status
+
+✅ Excel upload fully working
+
+---
+
+## 👤 Author
+
+**Lokesh Vyas**
