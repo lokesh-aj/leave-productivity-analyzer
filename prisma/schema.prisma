@@ -16,4 +16,6 @@ model Attendance {
   workedHours  Float
   isLeave      Boolean
   createdAt    DateTime @default(now())
+
+  @@map("Attendance")
 }

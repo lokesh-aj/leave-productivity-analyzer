@@ -6,7 +6,6 @@ import AttendanceTable from "@/components/dashboard/AttendanceTable"
 import Loader from "@/components/ui/Loader"
 import { AttendanceRecord } from "@/types/attendance"
 
-
 interface DashboardData {
   expectedHours: number
   workedHours: number
@@ -16,16 +15,18 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const [month, setMonth] = useState(
-    new Date().toISOString().slice(0, 7)
-  )
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
   const [data, setData] = useState<DashboardData | null>(null)
+  const [employeeSearch, setEmployeeSearch] = useState("")
 
   useEffect(() => {
-    fetch(`/api/dashboard?month=${month}`)
+    const params = new URLSearchParams({ month })
+    if (employeeSearch) params.append("employee", employeeSearch)
+
+    fetch(`/api/dashboard?${params.toString()}`)
       .then((res) => res.json())
       .then((response: DashboardData) => setData(response))
-  }, [month])
+  }, [month, employeeSearch])
 
   if (!data) return <Loader text="Loading dashboard..." />
 
@@ -37,9 +38,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-semibold tracking-tight">
             Leave & Productivity
           </h1>
-          <p className="muted mt-1">
-            Analytics overview of attendance performance
-          </p>
+          <p className="muted mt-1">Analytics overview of attendance performance</p>
         </div>
 
         <input
@@ -58,11 +57,18 @@ export default function DashboardPage() {
         <StatCard title="Productivity" value={`${data.productivity} %`} />
       </div>
 
+      {/* Employee Search */}
+      <input
+        type="text"
+        placeholder="Search employee by name..."
+        value={employeeSearch}
+        onChange={(e) => setEmployeeSearch(e.target.value)}
+        className="mb-4 w-full rounded-lg border border-[var(--border-color)] bg-white/5 px-3 py-2 text-sm text-white backdrop-blur"
+      />
+
       {/* Table */}
       <div>
-        <h2 className="mb-3 text-lg font-semibold">
-          Daily Attendance
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold">Daily Attendance</h2>
         <AttendanceTable records={data.records} />
       </div>
     </div>

@@ -2,7 +2,11 @@
 
 import { useState } from "react"
 
-export default function UploadPage() {
+interface UploadPageProps {
+  onUploadSuccess: () => void
+}
+
+export default function UploadPage({ onUploadSuccess }: UploadPageProps) {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -17,16 +21,27 @@ export default function UploadPage() {
     const formData = new FormData()
     formData.append("file", file)
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+      const data = await res.json()
 
-    const data = await res.json()
+      setLoading(false)
+      setMessage(data.message)
+      setShowPopup(true)
 
-    setLoading(false)
-    setMessage(data.message)
-    setShowPopup(true)
+      // Auto-refresh dashboard after 1s
+      setTimeout(() => {
+        onUploadSuccess()
+      }, 1000)
+    } catch (err) {
+      console.error(err)
+      setLoading(false)
+      setMessage("Upload failed. Please try again.")
+      setShowPopup(true)
+    }
   }
 
   return (
@@ -34,14 +49,13 @@ export default function UploadPage() {
       <div className="mx-auto max-w-xl p-6">
         <div className="card p-6 space-y-5">
           <div>
-            <h1 className="text-xl font-semibold">
-              Upload Attendance Excel
-            </h1>
+            <h1 className="text-xl font-semibold">Upload Attendance Excel</h1>
             <p className="text-sm text-slate-500 mt-1">
               Upload a .xlsx file to analyze attendance and productivity
             </p>
           </div>
 
+          {/* File input */}
           <input
             type="file"
             accept=".xlsx"
@@ -49,14 +63,14 @@ export default function UploadPage() {
             className="block w-full cursor-pointer rounded-lg border border-slate-300 bg-white p-2 text-sm file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-blue-700 hover:file:bg-blue-100"
           />
 
-          {/* File name display */}
+          {/* Display selected file */}
           {file && (
             <p className="text-sm text-slate-600">
-              📄 Selected file:{" "}
-              <span className="font-medium">{file.name}</span>
+              📄 Selected file: <span className="font-medium">{file.name}</span>
             </p>
           )}
 
+          {/* Upload button */}
           <button
             onClick={handleUpload}
             disabled={loading || !file}
@@ -74,13 +88,12 @@ export default function UploadPage() {
             <h2 className="text-lg font-semibold text-green-600">
               Upload Successful 🎉
             </h2>
-
-            <p className="text-sm text-slate-600">
-              {message || "Excel file uploaded successfully."}
-            </p>
-
+            <p className="text-sm text-slate-600">{message || "Excel file uploaded successfully."}</p>
             <button
-              onClick={() => setShowPopup(false)}
+              onClick={() => {
+                setShowPopup(false)
+                onUploadSuccess() // refresh dashboard on OK
+              }}
               className="w-full rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-black hover:opacity-90"
             >
               OK

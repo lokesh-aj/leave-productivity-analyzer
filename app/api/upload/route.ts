@@ -10,6 +10,20 @@ interface ExcelRow {
   "Out-Time"?: string
 }
 
+function normalizeExcelTime(value: any): string | null {
+  if (!value) return null
+
+  if (typeof value === "number") {
+    const totalMinutes = Math.round(value * 24 * 60)
+    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0")
+    const minutes = String(totalMinutes % 60).padStart(2, "0")
+    return `${hours}:${minutes}`
+  }
+
+  return String(value)
+}
+
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
@@ -29,30 +43,51 @@ export async function POST(req: Request) {
     const rows = XLSX.utils.sheet_to_json<ExcelRow>(sheet)
 
     for (const row of rows) {
-      const date = dayjs(row.Date).toDate()
+      const date = dayjs(row.Date).startOf("day").toDate()
       const day = dayjs(date).day()
-
+      
       let workedHours = 0
       let isLeave = false
 
-      if (!row["In-Time"] || !row["Out-Time"]) {
+      const hasInTime = row["In-Time"] && String(row["In-Time"]).trim() !== ""
+      const hasOutTime = row["Out-Time"] && String(row["Out-Time"]).trim() !== ""
+
+
+      const inTimeStr = normalizeExcelTime(row["In-Time"])
+      const outTimeStr = normalizeExcelTime(row["Out-Time"])
+
+      if (!inTimeStr || !outTimeStr) {
         if (day !== 0) isLeave = true
       } else {
-        const inTime = dayjs(`${row.Date} ${row["In-Time"]}`)
-        const outTime = dayjs(`${row.Date} ${row["Out-Time"]}`)
+        const inTime = dayjs(`${row.Date} ${inTimeStr}`)
+        const outTime = dayjs(`${row.Date} ${outTimeStr}`)
         workedHours = outTime.diff(inTime, "hour", true)
+      }
+
+
+      const existing = await prisma.attendance.findFirst({
+        where: {
+          employeeName: row["Employee Name"],
+          date,
+        },
+      })
+
+      if (existing) {
+        continue
       }
 
       await prisma.attendance.create({
         data: {
           employeeName: row["Employee Name"],
           date,
-          inTime: row["In-Time"] || null,
-          outTime: row["Out-Time"] || null,
+          inTime: inTimeStr,
+          outTime: outTimeStr,
           workedHours,
           isLeave,
         },
       })
+
+
     }
 
     return NextResponse.json({

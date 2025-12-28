@@ -11,6 +11,7 @@ export default function AttendanceTable({
       <table className="min-w-full text-sm">
         <thead className="bg-[var(--primary-soft)] text-left">
           <tr className="text-left text-slate-600 dark:text-slate-300">
+            <th className="px-4 py-3 font-medium">Employee Name</th>
             <th className="px-4 py-3 font-medium">Date</th>
             <th className="px-4 py-3 font-medium">In Time</th>
             <th className="px-4 py-3 font-medium">Out Time</th>
@@ -27,7 +28,9 @@ export default function AttendanceTable({
     record.isLeave ? "bg-red-500/10" : "hover:bg-white/5"
   }`}
 >
-
+<td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                {record.employeeName}
+              </td>
               <td className="px-4 py-3">
                 {dayjs(record.date).format("DD MMM YYYY")}
               </td>
